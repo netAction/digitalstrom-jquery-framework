@@ -30,23 +30,7 @@ function rawCommand(func, data, callback) {
 // Standard request for everything except login
 function request(func, data, callback) {
 	if(!localStorage.applicationToken) {
-		// Do login
-		rawCommand('/system/requestApplicationToken',{'applicationName':'FirstBlood'}, function(result) {
-			var applicationToken = result.applicationToken;
-
-			rawCommand('/system/login',{'user':prompt('Name','dssadmin'),'password':prompt('password')},
-				function(result) {
-					sessionToken = result.token;
-					rawCommand('/system/enableToken',{'applicationToken':applicationToken,'token':sessionToken},
-						function(result) {
-							localStorage.setItem('applicationToken', applicationToken);
-							data.token = sessionToken;
-							rawCommand(func, data, callback);
-						}
-					);
-				}
-			);
-		});
+		showLogin();
 	} else {
 		rawCommand('/system/loginApplication',
 			{'loginToken': localStorage.applicationToken},
@@ -58,8 +42,32 @@ function request(func, data, callback) {
 	}
 }
 
+function showLogin() {
+	$('#login').show();
+	$('#login-send').click(function(){
+		login($('#login-name').val(),$('#login-password').val());
+	});
+}
 
+function login(name, password) {
+	// Do login
+	rawCommand('/system/requestApplicationToken',{'applicationName':'FirstBlood'}, function(result) {
+		var applicationToken = result.applicationToken;
 
+		rawCommand('/system/login',{'user':name,'password':password},
+			function(result) {
+				sessionToken = result.token;
+				rawCommand('/system/enableToken',{'applicationToken':applicationToken,'token':sessionToken},
+					function(result) {
+						localStorage.setItem('applicationToken', applicationToken);
+						data.token = sessionToken;
+						rawCommand(func, data, callback);
+					}
+				);
+			}
+		);
+	});
+}
 
 
 function getAllInfo() {
