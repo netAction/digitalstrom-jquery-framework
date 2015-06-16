@@ -10,7 +10,7 @@ function rawCommand(func, data, callback) {
 				logError('Error with func '+func+': '+data.message);
 				if (data.message=='Application-Authentication failed') {
 					localStorage.setItem('applicationToken','');
-					logError('Application Token wrong.');
+					logError('Application Token wrong: '+ data.token);
 				}
 				if (data.message=='Authentication failed' || data.message=="Missing parameter 'password'") {
 					logError('Password wrong.');
