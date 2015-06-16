@@ -7,24 +7,28 @@ function rawCommand(func, data, callback) {
 		data: data,
 		success: function( data ) {
 			if(!data.ok) {
-				console.log('Error with func '+func+': '+data.message);
+				logError('Error with func '+func+': '+data.message);
 				if (data.message=='Application-Authentication failed') {
 					localStorage.setItem('applicationToken','');
-					console.log('Application Token wrong.');
+					logError('Application Token wrong.');
 				}
 				if (data.message=='Authentication failed' || data.message=="Missing parameter 'password'") {
-					console.log('Password wrong.');
+					logError('Password wrong.');
 				}
 				return;
 			}
 			// in case of success:
-			console.log('Success with func '+func, data.result);
+			logError('Success with func '+func);
 			callback(data.result);
 		},
 		error: function( data ) {
-			console.log('Special error with func: '+func);
+			logError('Special error with func: '+func);
 		}
 	});
+}
+
+function logError(message) {
+	$('#error').append(message+'<br><br>');
 }
 
 // Standard request for everything except login
@@ -136,13 +140,11 @@ function getAllInfo() {
 	request('/device/getSensorValue',
 		{'dsid':'303505d7f800004000030143','sensorIndex':2},
 		function(result) {
-		console.log(result);
 		$('.container').append('<h3>Bad-Spiegel Leistung: '+result.sensorValue+' W</h3>');
 	});
 	request('/device/getSensorValue',
 		{'dsid':'303505d7f800004000030143','sensorIndex':4},
 		function(result) {
-		console.log(result);
 		$('.container').append('<h3>Bad-Spiegel Energie: '+result.sensorValue+'0 Wh</h3>');
 	});
 
