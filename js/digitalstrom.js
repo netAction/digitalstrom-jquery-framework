@@ -33,17 +33,13 @@ function logError(message) {
 
 // Standard request for everything except login
 function request(func, data, callback) {
-	if(!localStorage.applicationToken) {
-		showLogin();
-	} else {
-		rawCommand('/system/loginApplication',
-			{'loginToken': localStorage.applicationToken},
-			function(result) {
-				data.token = result.token;
-				rawCommand(func, data, callback);
-			}
-		);
-	}
+	rawCommand('/system/loginApplication',
+		{'loginToken': localStorage.applicationToken},
+		function(result) {
+			data.token = result.token;
+			rawCommand(func, data, callback);
+		}
+	);
 }
 
 function showLogin() {
@@ -151,6 +147,13 @@ function getAllInfo() {
 } // getAllInfo
 
 $(function() {
+	if(!localStorage.applicationToken) {
+		showLogin();
+		return;
+	}
+
+
+
 	request('/apartment/getDevices', {}, function(result) {
 		$.each(result, function(index, device) {
 			$('#switches').append(
