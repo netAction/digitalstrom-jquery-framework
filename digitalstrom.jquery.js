@@ -51,7 +51,13 @@ function subsequentLogin() {
 		rawCommand('system/loginApplication',
 			{'loginToken': localStorage.dsApplicationToken},
 			function(result) {
-			logMessage('dsReady triggered, everything fine.');
+				if ((!result.ok) && (result.message='Application-Authentication failed')) {
+					localStorage.removeItem('dsApplicationToken');
+					logMessage('dsNeedLogin triggered as application token is no longer valid.');
+					$(document).trigger('dsNeedLogin', result.message);
+					return;
+				}
+				logMessage('dsReady triggered, everything fine.');
 				$(document).trigger('dsReady');
 			}
 		);
@@ -113,6 +119,7 @@ $.digitalstrom = {
 						if (!result.ok) {
 							logMessage('dsNeedLogin triggered as user unknown.');
 							$(document).trigger('dsNeedLogin', result.message);
+							return;
 						}
 						sessionToken = result.result.token;
 						rawCommand('system/enableToken',{'applicationToken':applicationToken,'token':sessionToken},
@@ -135,6 +142,12 @@ $.digitalstrom = {
 		rawCommand('system/loginApplication',
 			{'loginToken': localStorage.dsApplicationToken},
 			function(result) {
+				if ((!result.ok) && (result.message='Application-Authentication failed')) {
+					logMessage('dsNeedLogin triggered. Application-Authentication failed while trying to call '+func);
+					$(document).trigger('dsNeedLogin', result.message);
+					return;
+				}
+
 				data.token = result.result.token;
 				rawCommand(func, data, function(data) {
 					if(!data.ok) {

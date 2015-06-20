@@ -9,10 +9,11 @@ $(document).bind('dsNeedServer', sendServer);
 
 function showLogin() {
 	$('#login').show();
-	$('#login-send').click(function(){
-		$.digitalstrom.useCredentials($('#login-name').val(),$('#login-password').val());
-	});
 }
+$('#login-send').click(function(){
+	$.digitalstrom.useCredentials($('#login-name').val(),$('#login-password').val());
+});
+
 $(document).bind('dsNeedLogin', showLogin);
 
 
@@ -97,13 +98,16 @@ function getAllInfo() {
 
 
 function switches() {
+	$('#login').hide();
+
+
 	$.digitalstrom.request('apartment/getDevices', {}, function(result) {
 		console.log(result);
 		$.each(result, function(index, device) {
 			$('#switches').append(
-				device.name+
-				' <button class="btn btn-default" data-id="'+device.id+'" data-instruction="On">AN</button>'+
-				' <button class="btn btn-default" data-id="'+device.id+'" data-instruction="Off">AUS</button>'+
+				'<label>'+device.name+'</label>'+
+				' <button class="btn btn-success" data-id="'+device.id+'" data-instruction="On">AN</button>'+
+				' <button class="btn btn-danger" data-id="'+device.id+'" data-instruction="Off">AUS</button>'+
 				'<br><br>'
 			);
 		});

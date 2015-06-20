@@ -106,7 +106,7 @@ The user does not have to enter a name and password. It is also possible to auth
 
 **dsReady**
 
-After this event you can call **$.digitalstrom.request** whenever you like.
+After this event you can call **$.digitalstrom.request** whenever you like. Until one of the other two occur, than you have to wait for *dsReady* again.
 
 
 ## Storage
@@ -116,6 +116,9 @@ The Digitalstrom server sends a cookie on login. This is a cross domain cookie t
 This plugin does not use any persistent variables in JavaScript or jQuery namespaces. The only storage is the *localStorage*. We have *localStorage.dsServername*, *localStorage.dsApplicationName* and *localStorage.dsApplicationToken*.
 
 
+## TODO
 
+* dsNeedServer and dsNeedLogin should provide useful parameters.
+* The command's answer is stored in *data* or *result*. This should become *response*.
 
 
