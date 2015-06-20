@@ -2,9 +2,11 @@
 
 The Digitalstrom servers provide access via a JSON API. This gives web pages and apps an easy way for sending lighting commands and requesting sensor data. This plugin makes the connection even easier. Create a nice web page using jQuery and add the plugin file to create a digitalstrom interface in no time.
 
-## Example
+### [Demo](http://netaction.github.io/digitalstrom-jquery-framework/examples/bootstrap.html)
 
-Ask the user for his password.
+## Example application
+
+Connect to Digitalstrom server. Ask user for password, validate session and get server name.
 
     <!DOCTYPE html>
     <html lang="de">
