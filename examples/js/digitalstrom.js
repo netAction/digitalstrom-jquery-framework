@@ -1,73 +1,21 @@
-function rawCommand(func, data, callback) {
-	var serverUrl = 'https://192.168.10.32:8080/json';
-
-	$.ajax({
-		url: serverUrl+func+'?callback=?',
-		dataType: 'json',
-		data: data,
-		success: function( data ) {
-			if(!data.ok) {
-				logError('Error with func '+func+': '+data.message);
-				if (data.message=='Application-Authentication failed') {
-					localStorage.setItem('applicationToken','');
-					logError('Application Token wrong: '+ data.token);
-				}
-				if (data.message=='Authentication failed' || data.message=="Missing parameter 'password'") {
-					logError('Password wrong.');
-				}
-				return;
-			}
-			// in case of success:
-			logError('Success with func '+func);
-			callback(data.result);
-		},
-		error: function( data ) {
-			logError('Special error with func: '+func);
-		}
-	});
+function sendServer() {
+	console.log("Send Digitalstrom server name to plugin.");
+	// You could show a form here to let the user enter the server.
+	$.digitalstrom.useServer('https://192.168.10.32:8080');
 }
+$(document).bind('dsNeedServer', sendServer);
 
-function logError(message) {
-	$('#error').append(message+'<br><br>');
-}
 
-// Standard request for everything except login
-function request(func, data, callback) {
-	rawCommand('/system/loginApplication',
-		{'loginToken': localStorage.applicationToken},
-		function(result) {
-			data.token = result.token;
-			rawCommand(func, data, callback);
-		}
-	);
-}
 
 function showLogin() {
 	$('#login').show();
 	$('#login-send').click(function(){
-		login($('#login-name').val(),$('#login-password').val());
+		$.digitalstrom.useCredentials($('#login-name').val(),$('#login-password').val());
 	});
 }
+$(document).bind('dsNeedLogin', showLogin);
 
-function login(name, password) {
-	// Do login
-	rawCommand('/system/requestApplicationToken',{'applicationName':'FirstBlood'}, function(result) {
-		var applicationToken = result.applicationToken;
 
-		rawCommand('/system/login',{'user':name,'password':password},
-			function(result) {
-				sessionToken = result.token;
-				rawCommand('/system/enableToken',{'applicationToken':applicationToken,'token':sessionToken},
-					function(result) {
-						localStorage.setItem('applicationToken', applicationToken);
-						data.token = sessionToken;
-						rawCommand(func, data, callback);
-					}
-				);
-			}
-		);
-	});
-}
 
 
 function getAllInfo() {
@@ -146,15 +94,11 @@ function getAllInfo() {
 
 } // getAllInfo
 
-$(function() {
-	if(!localStorage.applicationToken) {
-		showLogin();
-		return;
-	}
 
 
-
-	request('/apartment/getDevices', {}, function(result) {
+function switches() {
+	$.digitalstrom.request('apartment/getDevices', {}, function(result) {
+		console.log(result);
 		$.each(result, function(index, device) {
 			$('#switches').append(
 				device.name+
@@ -168,12 +112,18 @@ $(function() {
 			var instruction = $(this).attr('data-instruction');
 			var id = $(this).attr('data-id');
 
-			request('/device/turn'+instruction, {'dsid':id}, function() {
+			$.digitalstrom.request('device/turn'+instruction, {'dsid':id}, function() {
 			});
 		});
 
 	});
 
-	getAllInfo();
+}
+$(document).bind('dsReady', switches);
 
+
+
+
+$(function() {
+	$.digitalstrom.init('Second Blood');
 });

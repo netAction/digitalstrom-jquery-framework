@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="de">
+	<head>
+		<meta charset="utf-8">
+	</head>
+	<body>
+		<h1>Digitalstrom</h1>
+		<pre class="ds-message-log"></pre>
+
+		<script src="js/jquery-2.1.4.min.js"></script>
+		<script src="../digitalstrom.jquery.js"></script>
+		<script type="application/javascript">
+
+		// When the plugin asks, tell where to find the server.
+		function sendServer() {
+			$.digitalstrom.useServer('https://192.168.10.32:8080');
+		}
+		$(document).bind('dsNeedServer', sendServer);
+
+		// When the plugin asks, tell user name and password.
+		function sendCredentials() {
+			$.digitalstrom.useCredentials('dssadmin',prompt('password for dssadmin'));
+		}
+		$(document).bind('dsNeedLogin', sendCredentials);
+
+
+		// And now start with the payload.
+		function doStuff() {
+			$.digitalstrom.request('/apartment/getName', {}, function(data) {
+				$('h1').text('Name: '+data.name);
+			});
+		}
+		$(document).bind('dsReady', doStuff);
+
+		// On page ready initalize your page in Digitalstrom server under a name of your choice
+		$(function() {
+			$.digitalstrom.init( navigator.userAgent );
+		});
+		</script>
+	</body>
+</html>
