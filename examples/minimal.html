@@ -12,10 +12,16 @@
 		<script type="application/javascript">
 
 		// When the plugin asks, tell where to find the server.
-		function sendServer() {
+		function sendServer(message, servername) {
+			// message: "no server selected", "timeout", "error", "parsererror"
+			if (servername == 'https://192.168.10.32:8080') {
+				$('h1').text('Could not access Digitalstrom server due to '+message+'.')
+					.after('<p>Check if <a href="'+servername+'">'+servername+'</a> is available.</p>');
+				return;
+			}
 			$.digitalstrom.useServer('https://192.168.10.32:8080');
 		}
-		$(document).bind('dsNeedServer', sendServer);
+		$(document).bind('dsNeedServer', function(event, message, servername) { sendServer(message, servername); });
 
 		// When the plugin asks, tell user name and password.
 		function sendCredentials() {

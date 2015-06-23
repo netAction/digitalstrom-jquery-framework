@@ -18,20 +18,24 @@ function logMessage(message) {
 // The Ajax call that is exclusively used for all communication to Digitalstrom server.
 // Not public, only used inside this plugin.
 function rawCommand(func, data, callback) {
-	var serverUrl = localStorage.dsServername+'/json/';
+	var url = localStorage.dsServername+'/json/'+func;
 
 	$.ajax({
-		url: serverUrl+func+'?callback=?',
+		url: url+'?callback=?',
 		dataType: 'json',
 		data: data,
-		success: function( data ) {
-			callback(data);
+		timeout: 3000,
+		success: function( response ) {
+			callback(response);
 		},
-		error: function() {
-			logMessage('dsNeedServer triggered as server not available when trying: '+func);
-			$(document).trigger('dsNeedServer');
-
-		}
+		error: function(jqXHR,textStatus) {
+			// textStatus: "timeout"
+			// "error" (SSL error, 404, server unavailable)
+			// "abort"
+			// "parsererror" (wrong type)
+			logMessage('dsNeedServer triggered as server not available due to ('+textStatus+') when trying: '+func);
+			$(document).trigger('dsNeedServer', [textStatus, localStorage.dsServername]);
+		},
 	});
 }
 
@@ -42,19 +46,19 @@ function subsequentLogin() {
 	// get rid of the zombie token cookie:
 	rawCommand('system/logout', {}, function() {
 		if(!localStorage.dsApplicationToken) {
-			logMessage('dsNeedLogin triggered as user unknown.');
-			$(document).trigger('dsNeedLogin');
+			logMessage('dsNeedLogin triggered as no application token set.');
+			$(document).trigger('dsNeedLogin', 'No application token set');
 			return;
 		}
 
 		// test token
 		rawCommand('system/loginApplication',
 			{'loginToken': localStorage.dsApplicationToken},
-			function(result) {
-				if ((!result.ok) && (result.message='Application-Authentication failed')) {
+			function(response) {
+				if ((!response.ok) && (response.message='Application-Authentication failed')) {
 					localStorage.removeItem('dsApplicationToken');
 					logMessage('dsNeedLogin triggered as application token is no longer valid.');
-					$(document).trigger('dsNeedLogin', result.message);
+					$(document).trigger('dsNeedLogin', response.message);
 					return;
 				}
 				logMessage('dsReady triggered, everything fine.');
@@ -87,12 +91,12 @@ $.digitalstrom = {
 		// Server unknown?
 		if(!localStorage.dsServername) {
 			logMessage('dsNeedServer triggered. Server URL not provided.');
-			$(document).trigger('dsNeedServer');
+			$(document).trigger('dsNeedServer', ['no server selected', '']);
 			return;
 		}
 		// Server available?
-		rawCommand('system/version', {}, function(data) {
-			logMessage('DS Server found at '+localStorage.dsServername+ ' with version '+data.result.version);
+		rawCommand('system/version', {}, function(response) {
+			logMessage('DS Server found at '+localStorage.dsServername+ ' with version '+response.result.version);
 			subsequentLogin();
 		});
 	},
@@ -110,20 +114,20 @@ $.digitalstrom = {
 		rawCommand('system/logout', {}, function() {
 
 			// Do login
-			rawCommand('system/requestApplicationToken',{'applicationName': localStorage.dsApplicationName}, function(result) {
+			rawCommand('system/requestApplicationToken',{'applicationName': localStorage.dsApplicationName}, function(response) {
 
-				var applicationToken = result.result.applicationToken;
+				var applicationToken = response.result.applicationToken;
 
 				rawCommand('system/login', {'user':name,'password':password},
-					function(result) {
-						if (!result.ok) {
+					function(response) {
+						if (!response.ok) {
 							logMessage('dsNeedLogin triggered as user unknown.');
-							$(document).trigger('dsNeedLogin', result.message);
+							$(document).trigger('dsNeedLogin', response.message);
 							return;
 						}
-						sessionToken = result.result.token;
+						sessionToken = response.result.token;
 						rawCommand('system/enableToken',{'applicationToken':applicationToken,'token':sessionToken},
-							function(result) {
+							function(response) {
 								localStorage.setItem('dsApplicationToken', applicationToken);
 								logMessage('dsReady triggered. User '+name+' successfully logged in.');
 								$(document).trigger('dsReady');
@@ -141,29 +145,29 @@ $.digitalstrom = {
 	request : function(func, data, callback) {
 		rawCommand('system/loginApplication',
 			{'loginToken': localStorage.dsApplicationToken},
-			function(result) {
-				if ((!result.ok) && (result.message='Application-Authentication failed')) {
+			function(response) {
+				if ((!response.ok) && (response.message='Application-Authentication failed')) {
 					logMessage('dsNeedLogin triggered. Application-Authentication failed while trying to call '+func);
-					$(document).trigger('dsNeedLogin', result.message);
+					$(document).trigger('dsNeedLogin', response.message);
 					return;
 				}
 
-				data.token = result.result.token;
-				rawCommand(func, data, function(data) {
-					if(!data.ok) {
-						logMessage('Error with func '+func+': '+data.message);
-						if (data.message=='Application-Authentication failed') {
+				data.token = response.result.token;
+				rawCommand(func, data, function(response) {
+					if(!response.ok) {
+						logMessage('Error with func '+func+': '+response.message);
+						if (response.message=='Application-Authentication failed') {
 							localStorage.setItem('applicationToken','');
-							logMessage('Application Token wrong: '+ data.token);
+							logMessage('Application Token wrong: '+ response.token);
 						}
-						if (data.message=='Authentication failed' || data.message=="Missing parameter 'password'") {
+						if (response.message=='Authentication failed' || response.message=="Missing parameter 'password'") {
 							logMessage('Password wrong.');
 						}
 						return;
 					}
 					// in case of success:
 					logMessage('Success with func '+func);
-					callback(data.result);
+					callback(response.result);
 				});
 			}
 		);

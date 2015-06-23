@@ -23,7 +23,13 @@ Connect to Digitalstrom server. Ask user for password, validate session and get 
     <script type="application/javascript">
 
     // When the plugin asks, tell where to find the server.
-    function sendServer() {
+    function sendServer(message, servername) {
+      // message: "no server selected", "timeout", "error", "parsererror"
+      if (servername == 'https://192.168.10.32:8080') {
+        $('h1').text('Could not access Digitalstrom server due to '+message+'.')
+          .after('<p>Check if <a href="'+servername+'">'+servername+'</a> is available.</p>');
+        return;
+      }
       $.digitalstrom.useServer('https://192.168.10.32:8080');
     }
     $(document).bind('dsNeedServer', sendServer);
@@ -117,11 +123,3 @@ After this event you can call **$.digitalstrom.request** whenever you like. Unti
 The Digitalstrom server sends a cookie on login. This is a cross domain cookie that can't be accessed from this plugin. We try to ignore it. For debugging it might be neccessary to delete it.
 
 This plugin does not use any persistent variables in JavaScript or jQuery namespaces. The only storage is the *localStorage*. We have *localStorage.dsServername*, *localStorage.dsApplicationName* and *localStorage.dsApplicationToken*.
-
-
-## TODO
-
-* dsNeedServer and dsNeedLogin should provide useful parameters.
-* The command's answer is stored in *data* or *result*. This should become *response*.
-
-
