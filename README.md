@@ -1,6 +1,10 @@
 # Digitalstrom framework for jQuery
 
-The Digitalstrom servers provide access via a JSON API. This gives web pages and apps an easy way for sending lighting commands and requesting sensor data. This plugin makes the connection even easier. Create a nice web page using jQuery and add the plugin file to create a digitalstrom interface in no time.
+The Digitalstrom servers provide access via a JSON API. It allows web pages and apps to send lighting commands and request sensor data. This plugin does all the connection and authentification stuff for you. You can create a nice web page using jQuery in no time, and the plugin file manages the connection.
+
+This plugin is designed to handle all possible troubles like *connection loss, timeout, SSL error, wrong server, broken server, missing credentials, wrong credentials* and so on. You just code some payload commands and provide the plugin with needed data in case of errors.
+
+
 
 ### [Demo](http://netaction.github.io/digitalstrom-jquery-framework/examples/bootstrap.html)
 
@@ -43,8 +47,8 @@ Connect to Digitalstrom server. Ask user for password, validate session and get 
 
     // And now start with the payload.
     function doStuff() {
-      $.digitalstrom.request('/apartment/getName', {}, function(data) {
-        $('h1').text('Name: '+data.name);
+      $.digitalstrom.request('/apartment/getName', {}, function(response) {
+        $('h1').text('Name: '+response.name);
       });
     }
     $(document).bind('dsReady', doStuff);
