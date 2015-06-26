@@ -30,9 +30,9 @@ function rawCommand(func, data, callback) {
 		},
 		error: function(jqXHR,textStatus) {
 			// textStatus: "timeout"
-			// "error" (SSL error, 404, server unavailable)
+			// "error": SSL error, 404, server unavailable (we can't differ between these)
 			// "abort"
-			// "parsererror" (wrong type)
+			// "parsererror": wrong data type or no data received
 			logMessage('dsNeedServer triggered as server not available due to ('+textStatus+') when trying: '+func);
 			$(document).trigger('dsNeedServer', [textStatus, localStorage.dsServername]);
 		},

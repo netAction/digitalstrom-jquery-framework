@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="de">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<title>Digitalstrom</title>
+		<link href="css/bootstrap.min.css" rel="stylesheet">
+		<style type="text/css">
+			label { width: 150px; max-width:100%;}
+		</style>
+	</head>
+	<body>
+		<div class="container">
+			<h1>Digitalstrom</h1>
+			<div id="login" class="jumbotron" style="display:none;">
+				<input value="dssadmin" id="login-name">
+				<input value="" id="login-password" placeholder="password">
+				<button id="login-send" class="btn btn-primary">Login</button>
+			</div>
+
+			<div id="scenes">
+			</div>
+			<pre class="ds-message-log"></pre>
+			<p>Docs: <a href="http://developer.digitalstrom.org/Architecture/dss-json.pdf">jSon</a>
+			<a href="http://developer.digitalstrom.org/Architecture/smartphone.pdf">Apps</a></p>
+
+		</div>
+		<script src="js/jquery-2.1.4.min.js"></script>
+		<script src="js/bootstrap.min.js"></script>
+		<script src="../digitalstrom.jquery.js"></script>
+		<script src="js/digitalstrom.js"></script>
+	</body>
+</html>

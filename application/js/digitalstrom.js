@@ -36,33 +36,48 @@ $(document).bind('dsNeedLogin', function(event, message, data) { showLogin(messa
 
 
 
-function switches() {
+function getAllInfo() {
 	$('#login').hide();
 
+	$.digitalstrom.request('/apartment/getName', {}, function(result) {
+		$('h1, title').text(result.name);
 
-	$.digitalstrom.request('apartment/getDevices', {}, function(result) {
-		console.log(result);
-		$.each(result, function(index, device) {
-			$('#switches').append(
-				'<label>'+device.name+'</label>'+
-				' <button class="btn btn-success" data-id="'+device.id+'" data-instruction="On">AN</button>'+
-				' <button class="btn btn-danger" data-id="'+device.id+'" data-instruction="Off">AUS</button>'+
-				'<br><br>'
-			);
+	});
+
+	$.digitalstrom.request('/property/query', {'query': '/apartment/zones/*(ZoneID,scenes,name)/groups/*(group)/scenes/*(scene,name)'}, function(response) {
+		$.each(response.zones, function(index, zone) {
+			// Is this not the generic zone 0?
+			if (zone.name) {
+				$('#scenes').append(
+					'<label>'+zone.name+'</label>'+
+					' <button class="btn btn-danger" data-ZoneID="'+zone.ZoneID+'" data-sceneNumber="0">Aus</button>'
+				);
+
+				$.each(zone.groups[1].scenes, function(index, scene) {
+					$('#scenes').append(
+						' <button class="btn btn-'+(scene.scene==5?'success':'warning')+'" data-ZoneID="'+zone.ZoneID+'" data-sceneNumber="'+scene.scene+'">'+scene.name+'</button>'
+					);
+				});
+				$('#scenes').append('<br><br>');
+			}
 		});
 
-		$('#switches button').click(function() {
-			var instruction = $(this).attr('data-instruction');
-			var id = $(this).attr('data-id');
 
-			$.digitalstrom.request('device/turn'+instruction, {'dsid':id}, function() {
-			});
+		$('#scenes button').click(function() {
+			var ZoneID = $(this).attr('data-ZoneID');
+			var sceneNumber = $(this).attr('data-sceneNumber');
+
+			$.digitalstrom.request('zone/callScene', {'sceneNumber': sceneNumber, 'id': ZoneID}, function() {});
 		});
 
 	});
 
-}
-$(document).bind('dsReady', switches);
+
+} // getAllInfo
+
+
+
+$(document).bind('dsReady', getAllInfo);
 
 
 
