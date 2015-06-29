@@ -50,12 +50,12 @@ function getAllInfo() {
 			if (zone.name) {
 				$('#scenes').append(
 					'<label>'+zone.name+'</label>'+
-					' <button class="btn btn-danger" data-ZoneID="'+zone.ZoneID+'" data-sceneNumber="0">Aus</button>'
+					' <button class="btn btn-danger btn-block" data-ZoneID="'+zone.ZoneID+'" data-sceneNumber="0">Aus</button>'
 				);
 
 				$.each(zone.groups[1].scenes, function(index, scene) {
 					$('#scenes').append(
-						' <button class="btn btn-'+(scene.scene==5?'success':'warning')+'" data-ZoneID="'+zone.ZoneID+'" data-sceneNumber="'+scene.scene+'">'+scene.name+'</button>'
+						' <button class="btn btn-'+(scene.scene==5?'success':'warning')+' btn-block" data-ZoneID="'+zone.ZoneID+'" data-sceneNumber="'+scene.scene+'">'+scene.name+'</button>'
 					);
 				});
 				$('#scenes').append('<br><br>');
