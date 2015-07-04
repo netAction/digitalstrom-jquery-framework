@@ -45,8 +45,8 @@ function switches() {
 		$.each(result, function(index, device) {
 			$('#switches').append(
 				'<label>'+device.name+'</label>'+
-				' <button class="btn btn-success" data-id="'+device.id+'" data-instruction="On">AN</button>'+
-				' <button class="btn btn-danger" data-id="'+device.id+'" data-instruction="Off">AUS</button>'+
+				' <button data-id="'+device.id+'" data-instruction="On">AN</button>'+
+				' <button data-id="'+device.id+'" data-instruction="Off">AUS</button>'+
 				'<br><br>'
 			);
 		});
@@ -66,7 +66,6 @@ $(document).bind('dsReady', switches);
 
 
 
-
 $(function() {
-	$.digitalstrom.init('Second Blood');
+	$.digitalstrom.init('Lightswitcher');
 });

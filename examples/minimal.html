@@ -7,7 +7,7 @@
 		<h1>Digitalstrom</h1>
 		<pre class="ds-message-log"></pre>
 
-		<script src="js/jquery-2.1.4.min.js"></script>
+		<script src="jquery-2.1.4.min.js"></script>
 		<script src="../digitalstrom.jquery.js"></script>
 		<script type="application/javascript">
 
@@ -34,6 +34,10 @@
 		function doStuff() {
 			$.digitalstrom.request('/apartment/getName', {}, function(data) {
 				$('h1').text('Name: '+data.name);
+			});
+
+			$.digitalstrom.request('/zone/blink', { 'id': 0 }, function(data) {
+				console.log('All rooms are blinking!')
 			});
 		}
 		$(document).bind('dsReady', doStuff);
