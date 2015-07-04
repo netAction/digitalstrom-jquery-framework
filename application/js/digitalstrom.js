@@ -1,3 +1,6 @@
+// Global handler for polling
+var pollingHandle;
+
 function sendServer(message, servername) {
 	// message: "no server selected", "timeout", "error", "parsererror"
 
@@ -13,7 +16,10 @@ function sendServer(message, servername) {
 	// You could show a form here to let the user enter the server.
 	$.digitalstrom.useServer('https://192.168.10.32:8080');
 }
-$(document).bind('dsNeedServer', function(event, message, servername) { sendServer(message, servername); });
+$(document).bind('dsNeedServer', function(event, message, servername) {
+	clearInterval(pollingHandle);
+	sendServer(message, servername);
+});
 
 
 
@@ -31,12 +37,33 @@ $('#login-send').click(function(){
 	$.digitalstrom.useCredentials($('#login-name').val(),$('#login-password').val());
 });
 
-$(document).bind('dsNeedLogin', function(event, message, data) { showLogin(message); });
+$(document).bind('dsNeedLogin', function(event, message, data) {
+	clearInterval(pollingHandle);
+	showLogin(message);
+});
 
 
+function markActiveScenes() {
+	$.digitalstrom.request('/property/query',
+		{'query': '/apartment/zones/*(ZoneID, name)/groups/*(lastCalledScene)'},
+		function(response) {
+			$.each(response.zones, function(index, zone) {
+				// Is this not the generic zone 0?
+				if (!zone.name) return;
+
+				// Un-emphasize scenes of this zone
+				$('button[data-ZoneID='+zone.ZoneID+']').removeClass('btn-primary').addClass('btn-default');
+				// Emphasize active scene of this zone
+				$('button[data-ZoneID='+zone.ZoneID+'][data-sceneNumber='+zone.groups[1].lastCalledScene+']')
+					.removeClass('btn-default').addClass('btn-primary');
+
+				console.log(zone.name, zone.ZoneID, zone.groups[1].lastCalledScene, new Date().toUTCString() );
+			});
+	});
+}
 
 
-function getAllInfo() {
+function start() {
 	$('#login').hide();
 
 	$.digitalstrom.request('/apartment/getName', {}, function(result) {
@@ -44,44 +71,56 @@ function getAllInfo() {
 
 	});
 
-	$.digitalstrom.request('/property/query', {'query': '/apartment/zones/*(ZoneID,scenes,name)/groups/*(group)/scenes/*(scene,name)'}, function(response) {
+	$.digitalstrom.request('/property/query',
+		{'query': '/apartment/zones/*(ZoneID,scenes,name)/groups/*(group)/scenes/*(scene,name)'},
+		function(response) {
+
 		$.each(response.zones, function(index, zone) {
 			// Is this not the generic zone 0?
-			if (zone.name) {
-				$('#scenes').append(
-					'<label>'+zone.name+'</label>'+
-					' <button class="btn btn-danger btn-block" data-ZoneID="'+zone.ZoneID+'" data-sceneNumber="0">Aus</button>'
-				);
+			if (!zone.name) return;
 
-				$.each(zone.groups[1].scenes, function(index, scene) {
-					$('#scenes').append(
-						' <button class="btn btn-'+(scene.scene==5?'success':'warning')+' btn-block" data-ZoneID="'+zone.ZoneID+'" data-sceneNumber="'+scene.scene+'">'+scene.name+'</button>'
-					);
-				});
-				$('#scenes').append('<br><br>');
-			}
+			$('#scenes').append(
+				'<label>'+zone.name+'</label>'+
+				' <button class="btn btn-default btn-block" data-ZoneID="'+zone.ZoneID+'" data-sceneNumber="0">Aus</button>'
+			);
+
+			$.each(zone.groups[1].scenes, function(index, scene) {
+				$('#scenes').append(
+					' <button class="btn btn-default btn-block" data-ZoneID="'+zone.ZoneID+'" data-sceneNumber="'+scene.scene+'">'+scene.name+'</button>'
+				);
+			});
+			$('#scenes').append('<br><br>');
 		});
 
 
+		// Click a button
 		$('#scenes button').click(function() {
 			var ZoneID = $(this).attr('data-ZoneID');
 			var sceneNumber = $(this).attr('data-sceneNumber');
 
-			$.digitalstrom.request('zone/callScene', {'sceneNumber': sceneNumber, 'id': ZoneID}, function() {});
+			$.digitalstrom.request('zone/callScene', {'sceneNumber': sceneNumber, 'id': ZoneID}, function() {
+				markActiveScenes();
+			});
 		});
+
+
+		// Poll status every 10 seconds
+		pollingHandle = setInterval(function() {
+			markActiveScenes();
+		}, 15000);
+		markActiveScenes();
 
 	});
 
-
-} // getAllInfo
-
+} // getAllScenes
 
 
-$(document).bind('dsReady', getAllInfo);
+
+$(document).bind('dsReady', start);
 
 
 
 
 $(function() {
-	$.digitalstrom.init('Second Blood');
+	$.digitalstrom.init('Scene Application');
 });
