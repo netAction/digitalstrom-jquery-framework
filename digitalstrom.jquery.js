@@ -7,7 +7,7 @@
 
 (function( $ ) {
 
-// Print important messages to console and if you like to elements with class ds-message-log.
+// Print important messages to console. If there is an element with class ds-message-log, append message
 // Not public, only used inside this plugin.
 function logMessage(message) {
 	$('.ds-message-log').append(message+"\n");
@@ -147,11 +147,13 @@ $.digitalstrom = {
 			{'loginToken': localStorage.dsApplicationToken},
 			function(response) {
 				if ((!response.ok) && (response.message='Application-Authentication failed')) {
+					// Caution: “Application-Authentication failed” will also show up when too many tokens are requested in short time.
 					logMessage('dsNeedLogin triggered. Application-Authentication failed while trying to call '+func);
 					$(document).trigger('dsNeedLogin', response.message);
 					return;
 				}
 
+				// Add login token to parameters
 				data.token = response.result.token;
 				rawCommand(func, data, function(response) {
 					if(!response.ok) {

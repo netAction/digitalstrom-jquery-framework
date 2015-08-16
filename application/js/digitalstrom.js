@@ -1,3 +1,7 @@
+// Off: 0
+// Scene 1-4: 5,17,18,19
+// Scene 10-14: 32 20,21,22 33?
+
 // Global handler for polling
 var pollingHandle;
 
@@ -104,10 +108,10 @@ function start() {
 		});
 
 
-		// Poll status every 10 seconds
+		// Poll status every 45 seconds
 		pollingHandle = setInterval(function() {
 			markActiveScenes();
-		}, 15000);
+		}, 45000);
 		markActiveScenes();
 
 	});
